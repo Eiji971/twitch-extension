@@ -107,8 +107,8 @@ df_player_data = df_player_data.drop((['username', 'gold', 'colorSkin']), axis=1
 
 
 
-df_player_data[['userId', 'adventurerClass', 'Level', 'curExp', 'soul', 'elo', 'voteScore', 'inventory', 
-                'classMastery', 'curMana', 'badges', 'manualManaActivated', 'element', 'weapon', 'skillPoints', 'item']] = df_raw_data['player'].apply(
+df_player_data[['userId', 'adventurerClass', 'Level', 'curExp', 'soul', 'elo', 'voteScore', 
+                'classMastery', 'curMana',  'manualManaActivated', 'element', 'weapon', 'skillPoints', 'item']] = df_raw_data['player'].apply(
                     lambda x: pd.Series([
                         x['userId'],
                         x['adventurerClass'],
@@ -117,16 +117,14 @@ df_player_data[['userId', 'adventurerClass', 'Level', 'curExp', 'soul', 'elo', '
                         x['soul'],
                         x['elo'],
                         x['voteScore'],
-                        x['inventory'],
                         x['classMastery'],
                         x['curMana'],
-                        x['badges'],
                         x['manualManaActivated'],
                         x['element'],
                         x['weapon'],
                         x['skillPoints'],
                         x['item']
-                    ]) if isinstance(x, dict) else pd.Series([None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None])
+                    ]) if isinstance(x, dict) else pd.Series([None, None, None, None, None, None, None, None, None, None, None, None, None, None])
 )
 
 import_sql.ingest_data_from_dataframe(df_player_data, 'player_data')
@@ -154,6 +152,7 @@ df_player_stat = df_player_stat.rename(columns={
 
 print(df_player_stat.head())
 
+import_sql.ingest_data_from_dataframe(df_player_stat, 'player_permanent_stat_data')
 
 df_item_data = df_raw_data.copy()
 
@@ -173,6 +172,8 @@ df_item_data = df_item_data.rename(columns={
 
 print(df_item_data.head())
 
+import_sql.ingest_data_from_dataframe(df_item_data, 'player_item_data')
+
 df_item_stat = df_item_data_raw[['userId', 'player.item.bonusStats.vitality', 'player.item.bonusStats.strength', 'player.item.bonusStats.agility', 'player.item.bonusStats.intelligence', 
                                  'player.item.bonusStats.resistance', 'player.item.bonusStats.luck', 'player.item.baseDefense', 'player.item.upgradeDefense']]
 
@@ -190,9 +191,12 @@ df_item_stat = df_item_stat.rename(columns={
 
 print(df_item_stat.head())
 
+import_sql.ingest_data_from_dataframe(df_item_stat, 'player_item_stat')
+
 df_weapon_raw = df_raw_data.copy()
 
-df_weapon_data = df_weapon_raw[['player.weapon.name',
+df_weapon_data = df_weapon_raw[['userId',
+                                'player.weapon.name',
                                 'player.weapon.origin', 
                                 'player.weapon.element',
                                 'player.weapon.specialAttribute', 
@@ -200,6 +204,7 @@ df_weapon_data = df_weapon_raw[['player.weapon.name',
                                 'player.weapon.evolutionMax']]
 
 df_weapon_data = df_weapon_data.rename(columns={
+                                'userId': 'user_id',
                                 'player.weapon.name':'name',
                                 'player.weapon.origin': 'origin',
                                 'player.weapon.element': 'element',
@@ -210,8 +215,10 @@ df_weapon_data = df_weapon_data.rename(columns={
 
 print(df_weapon_data.head())
 
+import_sql.ingest_data_from_dataframe(df_weapon_data, 'player_weapon_data')
 
-df_weapon_stat = df_weapon_raw[['player.weapon.bonusStats.vitality',
+df_weapon_stat = df_weapon_raw[['userId',
+                                'player.weapon.bonusStats.vitality',
                                 'player.weapon.bonusStats.strength', 
                                 'player.weapon.bonusStats.agility',
                                 'player.weapon.bonusStats.intelligence',
@@ -225,6 +232,7 @@ df_weapon_stat = df_weapon_raw[['player.weapon.bonusStats.vitality',
 
 
 df_weapon_stat = df_weapon_stat.rename(columns={
+                                'userId': 'user_id',
                                 'player.weapon.bonusStats.vitality': 'vitality',
                                 'player.weapon.bonusStats.strength': 'strength', 
                                 'player.weapon.bonusStats.agility': 'agility',
@@ -241,10 +249,11 @@ df_weapon_stat = df_weapon_stat.rename(columns={
 
 print(df_weapon_stat.head())
 
+import_sql.ingest_data_from_dataframe(df_weapon_stat, 'player_weapon_stat')
 
 df_pet_data = df_raw_data.copy()
 
-df_pet_data = df_pet_data[['player.pet.name', 'player.pet.origin',
+df_pet_data = df_pet_data[['userId', 'player.pet.name', 'player.pet.origin',
                         'player.pet.element', 'player.pet.curHealth', 
                         'player.pet.foodTarget', 'player.pet.baseHealth', 
                         'player.pet.fedCount',  'player.pet.equipped',
@@ -252,6 +261,7 @@ df_pet_data = df_pet_data[['player.pet.name', 'player.pet.origin',
                         'player.pet.bonusType', 'player.pet.bonusTypePercent']]
 
 df_pet_data = df_pet_data.rename(columns={
+                    'userId': 'user_id',
                     'player.pet.name': 'name', 
                     'player.pet.origin': 'origin',
                     'player.pet.element': 'element', 
@@ -268,3 +278,5 @@ df_pet_data = df_pet_data.rename(columns={
 
 
 print(df_pet_data.head())
+
+import_sql.ingest_data_from_dataframe(df_pet_data, 'player_pet_data')
