@@ -33,8 +33,8 @@ def create_table_schema(table_schema):
 
 user_data_schema = (
     "CREATE TABLE IF NOT EXISTS user_data ("
-    "  username VARCHAR(25) PRIMARY KEY,"
-    "  userID INTEGER,"
+    "  username VARCHAR(25),"
+    "  user_id INTEGER PRIMARY KEY,"
     "  gold INTEGER,"
     "  colorSkin INTEGER "
     ");"
@@ -59,7 +59,7 @@ player_data_schema = (
 
 player_permanent_stat_data_schema = (
     "CREATE TABLE IF NOT EXISTS player_permanent_stat_data ("
-    "  user_id INTEGER PRIMARY KEY,"
+    "  user_id FLOAT PRIMARY KEY,"
     "  vitality FLOAT,"
     "  strength FLOAT,"
     "  agility FLOAT,"
@@ -84,22 +84,22 @@ player_item_data_schema = (
     
 player_item_stat_schema = (
     "CREATE TABLE IF NOT EXISTS player_item_stat ("
-    "  item_id INT AUTO_INCREMENT PRIMARY KEY,"
-    "  vitality INTEGER,"
-    "  strength INTEGER,"
-    "  agility INTEGER,"
-    "  INTEGERelligence INTEGER,"
-    "  resistance INTEGER,"
-    "  luck INTEGER,"
-    "  baseDefense INTEGER,"
-    "  upgradeDefense INTEGER"
+    "  user_id FLOAT PRIMARY KEY,"
+    "  vitality FLOAT,"
+    "  strength FLOAT,"
+    "  agility FLOAT,"
+    "  intelligence FLOAT,"
+    "  resistance FLOAT,"
+    "  luck FLOAT,"
+    "  baseDefense FLOAT,"
+    "  upgradeDefense FLOAT"
     ");"
 )
 
 
 player_weapon_stat_schema = (
     "CREATE TABLE IF NOT EXISTS player_weapon_stat ("
-    "  weapon_id INT AUTO_INCREMENT PRIMARY KEY,"
+    "  user_id INTEGER PRIMARY KEY,"
     "  vitality FLOAT,"
     "  strength FLOAT,"
     "  agility FLOAT,"
@@ -154,7 +154,7 @@ create_table_schema(player_weapon_stat_schema)
 create_table_schema(player_weapon_data_schema)
 create_table_schema(player_pet_data_schema)
 
-def ingest_data_from_dataframe(dataframe, table_name):
+def ingest_data_from_dataframe(dataframe, table_name, primary_key_column):
     try:
         conn = mysql.connector.connect(
             host='127.0.0.1',
@@ -168,10 +168,12 @@ def ingest_data_from_dataframe(dataframe, table_name):
 
         placeholders = ', '.join(['%s'] * len(dataframe.columns))
 
-        insert_query = f"INSERT IGNORE INTO {table_name}({', '.join(dataframe.columns)}) VALUES ({placeholders})"
+        insert_query = f"INSERT INTO {table_name} ({', '.join(dataframe.columns)}) VALUES ({placeholders}) ON DUPLICATE KEY UPDATE {primary_key_column} = VALUES({primary_key_column})"
 
         for _, row in dataframe.iterrows():
-            values = tuple(row.values)
+            # Convert 'userID' to int if it's not empty, otherwise, set it to None
+            user_id = int(row['user_id']) if row['user_id'] is not None and row['user_id'] != '' else None
+            values = tuple([user_id] + list(row.values)[1:]) 
             cursor.execute(insert_query, values)
         conn.commit()
     except mysql.connector.Error as err:
@@ -184,4 +186,83 @@ def ingest_data_from_dataframe(dataframe, table_name):
         if 'conn' in locals():
             conn.close()
         
+def ingest_data_permanent_stat(dataframe):
+    try:
+        conn = mysql.connector.connect(
+            host='127.0.0.1',
+            port='3306',
+            user='root',
+            password='Orobou',
+            database='game',
+        )
 
+        cursor = conn.cursor()
+
+        insert_query = """
+            INSERT INTO player_item_stat (user_id, vitality, strength, agility, intelligence, resistance, luck)
+            VALUES (%s, %s, %s, %s, %s, %s, %s)
+            ON DUPLICATE KEY UPDATE
+            vitality = VALUES(vitality),
+            strength = VALUES(strength),
+            agility = VALUES(agility),
+            intelligence = VALUES(intelligence),
+            resistance = VALUES(resistance),
+            luck = VALUES(luck)
+        """
+
+        for row in dataframe.itertuples():
+            values = row[1:]  # Exclude the index
+            cursor.execute(insert_query, values)
+
+        conn.commit()
+    except mysql.connector.Error as err:
+        print(f"Error: {err}")
+        if 'conn' in locals():
+            conn.rollback()
+    finally:
+        if 'cursor' in locals():
+            cursor.close()
+        if 'conn' in locals():
+            conn.close()
+
+
+def ingest_item_stat(dataframe):
+    try:
+        conn = mysql.connector.connect(
+            host='127.0.0.1',
+            port='3306',
+            user='root',
+            password='Orobou',
+            database='game',
+        )
+
+        cursor = conn.cursor()
+
+        insert_query = """
+            INSERT INTO player_item_stat (user_id, vitality, strength, agility, intelligence, resistance, luck, baseDefense, upgradeDefense)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+            ON DUPLICATE KEY UPDATE
+            vitality = VALUES(vitality),
+            strength = VALUES(strength),
+            agility = VALUES(agility),
+            intelligence = VALUES(intelligence),
+            resistance = VALUES(resistance),
+            luck = VALUES(luck),
+            baseDefense = VALUES(baseDefense),
+            upgradeDefense = VALUES(upgradeDefense)
+        """
+
+        for row in dataframe.itertuples():
+            values = row[1:]  # Exclude the index
+            cursor.execute(insert_query, values)
+
+        conn.commit()
+    except mysql.connector.Error as err:
+        print(f"Error: {err}")
+        if 'conn' in locals():
+            conn.rollback()
+    finally:
+        if 'cursor' in locals():
+            cursor.close()
+        if 'conn' in locals():
+            conn.close()
