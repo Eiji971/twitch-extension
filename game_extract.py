@@ -263,7 +263,7 @@ df_weapon_data['user_id'] = pd.to_numeric(df_weapon_data['user_id'], errors='coe
 df_weapon_data = df_weapon_data.dropna(subset=['user_id'])
 
 import_sql.ingest_data_from_dataframe(df_weapon_data, 'player_weapon_data', 'user_id')
-info
+
 df_weapon_stat = df_weapon_raw[['userId',
                                 'player.weapon.bonusStats.vitality',
                                 'player.weapon.bonusStats.strength', 
