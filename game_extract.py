@@ -176,7 +176,7 @@ df_player_stat['user_id'] = pd.to_numeric(df_player_stat['user_id'], errors='coe
 df_player_stat = df_player_stat.dropna(subset=['user_id', 'vitality', 'strength', 'agility', 'intelligence', 'resistance', 'luck'])
 df_player_stat = df_player_stat.drop_duplicates(subset=['user_id'])
 
-print(df_player_stat.info(verbose=True))
+#print(df_player_stat.info(verbose=True))
 
 import_sql.ingest_data_permanent_stat(df_player_stat)
 
@@ -227,7 +227,7 @@ df_item_stat = df_item_stat.rename(columns={
     'player.item.upgradeDefense': 'upgradeDefense'
 })
 
-print(df_item_stat.head())
+#print(df_item_stat.head())
 
 df_item_stat['user_id'] = pd.to_numeric(df_item_stat['user_id'], errors='coerce', downcast='integer')
 
@@ -263,7 +263,7 @@ df_weapon_data['user_id'] = pd.to_numeric(df_weapon_data['user_id'], errors='coe
 df_weapon_data = df_weapon_data.dropna(subset=['user_id'])
 
 import_sql.ingest_data_from_dataframe(df_weapon_data, 'player_weapon_data', 'user_id')
-
+info
 df_weapon_stat = df_weapon_raw[['userId',
                                 'player.weapon.bonusStats.vitality',
                                 'player.weapon.bonusStats.strength', 
