@@ -2,7 +2,7 @@ import pandas as pd
 import json
 import import_sql 
 
-filepath = '/Users/emerybosc/Downloads/users2.json'
+filepath = '/Users/emerybosc/Documents/oro_game/user.json'
 with open(filepath, "r") as file:
     data = json.load(file)
 
@@ -173,8 +173,7 @@ df_player_stat = pd.DataFrame(df_player_stat1)
 
 df_player_stat['user_id'] = pd.to_numeric(df_player_stat['user_id'], errors='coerce', downcast='integer')
 
-df_player_stat = df_player_stat.dropna(subset=['user_id', 'vitality', 'strength', 'agility', 'intelligence', 'resistance', 'luck'])
-df_player_stat = df_player_stat.drop_duplicates(subset=['user_id'])
+df_player_stat = df_player_stat.dropna(subset=['user_id'])
 
 #print(df_player_stat.info(verbose=True))
 

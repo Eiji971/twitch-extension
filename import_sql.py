@@ -59,7 +59,7 @@ player_data_schema = (
 
 player_permanent_stat_data_schema = (
     "CREATE TABLE IF NOT EXISTS player_permanent_stat_data ("
-    "  user_id FLOAT PRIMARY KEY,"
+    "  user_id INTEGER PRIMARY KEY,"
     "  vitality FLOAT,"
     "  strength FLOAT,"
     "  agility FLOAT,"
@@ -84,7 +84,7 @@ player_item_data_schema = (
     
 player_item_stat_schema = (
     "CREATE TABLE IF NOT EXISTS player_item_stat ("
-    "  user_id FLOAT PRIMARY KEY,"
+    "  user_id INTEGER PRIMARY KEY,"
     "  vitality FLOAT,"
     "  strength FLOAT,"
     "  agility FLOAT,"
@@ -199,7 +199,7 @@ def ingest_data_permanent_stat(dataframe):
         cursor = conn.cursor()
 
         insert_query = """
-            INSERT INTO player_item_stat (user_id, vitality, strength, agility, intelligence, resistance, luck)
+            INSERT INTO player_permanent_stat_data (user_id, vitality, strength, agility, intelligence, resistance, luck)
             VALUES (%s, %s, %s, %s, %s, %s, %s)
             ON DUPLICATE KEY UPDATE
             vitality = VALUES(vitality),
